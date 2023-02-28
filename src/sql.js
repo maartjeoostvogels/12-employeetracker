@@ -7,8 +7,9 @@ const getDepartments = async () => {
 
 const getRoles = async () => {
     const [rows] = await db.query(`
-        SELECT role.id, title, salary
+        SELECT role.id, title, salary, department.name as department
         FROM role
+        LEFT JOIN department ON role.department_id = department.id
     `);
 
     return rows;
@@ -26,8 +27,18 @@ const getManagers = async () => {
 
 const getEmployees = async () => {
     const [rows] = await db.query(`
-        SELECT id, first_name as firstName, last_name as lastName
+        SELECT
+            employee.id,
+            employee.first_name as firstName,
+            employee.last_name as lastName,
+            role.title as jobTitle,
+            role.salary AS salary,
+            department.name AS department,
+            manager.first_name AS manager
         FROM employee
+        LEFT JOIN role ON employee.role_id = role.id
+        LEFT JOIN department ON role.department_id = department.id
+        LEFT JOIN employee as manager ON employee.manager_id = manager.id
     `);
 
     return rows;
