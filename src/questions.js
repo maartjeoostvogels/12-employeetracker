@@ -1,3 +1,11 @@
+const { Separator } = require('inquirer');
+const {
+    getDepartments,
+    getRoles,
+    getManagers,
+    getEmployees
+} = require('./sql');
+
 const nextActionQuestions = [
     {
         type: 'list',
@@ -6,12 +14,16 @@ const nextActionQuestions = [
         choices: [
             { name: 'View all departments', value: 'viewDepartments' },
             { name: 'View all roles', value: 'viewRoles' },
+            { name: 'View all employees', value: 'viewEmployees' },
             { name: 'Add a department', value: 'addDepartment' },
             { name: 'Add a role', value: 'addRole' },
             { name: 'Add an employee', value: 'addEmployee' },
             { name: 'Update an employee role', value: 'updateEmployee' },
-            { name: 'Finish', value: 'finish' }
-        ]
+            new Separator(),
+            { name: 'Exit', value: 'exit' }
+        ],
+        loop: false,
+        pageSize: 10
     }
 ];
 
@@ -26,7 +38,7 @@ const addDepartmentQuestions = [
 const addRoleQuestions = [
     {
         type: 'input',
-        name: 'name',
+        name: 'title',
         message: 'What is the name of the role?'
     },
     {
@@ -36,9 +48,15 @@ const addRoleQuestions = [
     },
     {
         type: 'list',
-        name: 'department',
+        name: 'departmentId',
         message: 'Which department is the role is based in?',
-        choices: ['Finance', 'Sales', 'Marketing', 'Human Resources']
+        choices: () => getDepartments().then(
+            departments => departments.map(department => ({
+                name: department.name,
+                value: department.id
+            }))
+        ),
+        loop: false
     }
 ];
 
@@ -55,30 +73,59 @@ const addEmployeeQuestions = [
     },
     {
         type: 'list',
-        name: 'role',
+        name: 'roleId',
         message: 'What is their role?',
-        choices: ['Finance Controller', 'Finance Assistant', 'Sales Manager']
+        choices: () => getRoles().then(
+            roles => roles.map(role => ({
+                name: role.title,
+                value: role.id
+            }))
+        ),
+        loop: false
     },
     {
         type: 'list',
-        name: 'manager',
+        name: 'managerId',
         message: 'Who is their manager?',
-        choices: ['John Doe', 'Jane Doe', 'Peter Plum']
+        choices: () => getManagers().then(managers => {
+            const choices = managers.map(manager => ({
+                name: `${manager.firstName} ${manager.lastName}`,
+                value: manager.id
+            }));
+            choices.push({
+                name: 'No Manager',
+                value: null
+            });
+            return choices;
+        }),
+        loop: false
     }
 ];
 
 const updateEmployeeQuestions = [
     {
         type: 'list',
-        name: 'employee',
+        name: 'employeeId',
         message: 'Which employee to update?',
-        choices: ['John Doe', 'Jane Doe', 'Peter Plum']
+        choices: () => getEmployees().then(
+            employees => employees.map(employee => ({
+                name: `${employee.firstName} ${employee.lastName}`,
+                value: employee.id
+            }))
+        ),
+        loop: false
     },
     {
         type: 'list',
-        name: 'role',
+        name: 'roleId',
         message: 'What is their new role?',
-        choices: ['Finance Controller', 'Finance Assistant', 'Sales Manager']
+        choices: () => getRoles().then(
+            roles => roles.map(role => ({
+                name: role.title,
+                value: role.id
+            }))
+        ),
+        loop: false
     }
 ];
 
