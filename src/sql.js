@@ -7,7 +7,11 @@ const getDepartments = async () => {
 
 const getRoles = async () => {
     const [rows] = await db.query(`
-        SELECT role.id, title, salary, department.name as department
+        SELECT
+            role.id,
+            title,
+            FORMAT(salary, 0) as salary,
+            department.name as department
         FROM role
         LEFT JOIN department ON role.department_id = department.id
     `);
@@ -17,7 +21,7 @@ const getRoles = async () => {
 
 const getManagers = async () => {
     const [rows] = await db.query(`
-        SELECT id, first_name as firstName, last_name as lastName
+        SELECT id, CONCAT(first_name, ' ', last_name) as name
         FROM employee
         WHERE manager_id IS NULL
     `);
@@ -29,12 +33,11 @@ const getEmployees = async () => {
     const [rows] = await db.query(`
         SELECT
             employee.id,
-            employee.first_name as firstName,
-            employee.last_name as lastName,
-            role.title as jobTitle,
-            role.salary AS salary,
+            CONCAT(employee.first_name, ' ', employee.last_name) as name,
+            role.title as title,
+            FORMAT(role.salary, 0) as salary,
             department.name AS department,
-            manager.first_name AS manager
+            CONCAT(manager.first_name, ' ', manager.last_name) as manager
         FROM employee
         LEFT JOIN role ON employee.role_id = role.id
         LEFT JOIN department ON role.department_id = department.id

@@ -44,16 +44,23 @@ const addRoleQuestions = [
     {
         type: 'input',
         name: 'salary',
-        message: 'What is the salary for the role?'
+        message: 'What is the salary for the role?',
+        filter: salary => salary.replace(/\D/g, ''),
+        validate: salary => {
+            if (Number.isNaN(salary) || salary <= 0) {
+                return 'Salary must be a number greater than zero';
+            }
+            return true;
+        }
     },
     {
         type: 'list',
         name: 'departmentId',
         message: 'Which department is the role is based in?',
         choices: () => getDepartments().then(
-            departments => departments.map(department => ({
-                name: department.name,
-                value: department.id
+            departments => departments.map(({id, name}) => ({
+                name: name,
+                value: id
             }))
         ),
         loop: false
@@ -76,9 +83,9 @@ const addEmployeeQuestions = [
         name: 'roleId',
         message: 'What is their role?',
         choices: () => getRoles().then(
-            roles => roles.map(role => ({
-                name: role.title,
-                value: role.id
+            roles => roles.map(({id, title}) => ({
+                name: title,
+                value: id
             }))
         ),
         loop: false
@@ -88,9 +95,9 @@ const addEmployeeQuestions = [
         name: 'managerId',
         message: 'Who is their manager?',
         choices: () => getManagers().then(managers => {
-            const choices = managers.map(manager => ({
-                name: `${manager.firstName} ${manager.lastName}`,
-                value: manager.id
+            const choices = managers.map(({id, name}) => ({
+                name: name,
+                value: id
             }));
             choices.push({
                 name: 'No Manager',
@@ -108,9 +115,9 @@ const updateEmployeeQuestions = [
         name: 'employeeId',
         message: 'Which employee to update?',
         choices: () => getEmployees().then(
-            employees => employees.map(employee => ({
-                name: `${employee.firstName} ${employee.lastName}`,
-                value: employee.id
+            employees => employees.map(({id, name}) => ({
+                name: name,
+                value: id
             }))
         ),
         loop: false
@@ -120,9 +127,9 @@ const updateEmployeeQuestions = [
         name: 'roleId',
         message: 'What is their new role?',
         choices: () => getRoles().then(
-            roles => roles.map(role => ({
-                name: role.title,
-                value: role.id
+            roles => roles.map(({id, title}) => ({
+                name: title,
+                value: id
             }))
         ),
         loop: false
